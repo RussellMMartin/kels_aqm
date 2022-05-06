@@ -3,8 +3,9 @@
 
 void warmup_voc(void)
 {
+  pinMode(VOC_ACT_PIN, OUTPUT);
   digitalWrite(VOC_ACT_PIN, HIGH);
-  delay(1 * 1000);
+  delay(2 * 1000);
   digitalWrite(VOC_ACT_PIN, LOW);
 }
 

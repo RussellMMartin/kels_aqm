@@ -3,16 +3,25 @@
 
 // includes
 #include <arduino-timer.h>
-//#include "voc_helpers.h"
+#include "MQ131.h" // https://github.com/ostaquet/Arduino-MQ131-driver
+
 
 // defines
 #define DEBUG 1
+#define VOC_FREQ 1000
+#define OZO_FREQ 10000
 
 // module-level variables
 auto timer = timer_create_default();
-int VOC_val;
+int VOC_val = 0;
+int Ozo_val = 0; //ppb
 
 void setup() {
+  // start serial
+  if(DEBUG) {
+    Serial.begin(115200);
+  }
+  
   // pin setup
   pinMode(LED_BUILTIN, OUTPUT);
 
@@ -21,17 +30,15 @@ void setup() {
 
   // warm up sensors (5 sec)
   warmup_voc();
+  warmup_ozo();
 
   // indicate setup is concluded
   digitalWrite(LED_BUILTIN, LOW);
 
-  // start looping timers to take measurements every 5 secs
-  timer.every(1000, toggle_voc_sensor);
+  // start looping timers to take measurements 
+  timer.every(VOC_FREQ, toggle_voc_sensor);
+  timer.every(OZO_FREQ, toggle_ozo_sensor);
 
-  // start serial
-  if(DEBUG) {
-    Serial.begin(115200);
-  }
 }
 
 void loop() {
@@ -47,22 +54,29 @@ void postNewMeasurement(char source, int newMeasVal)
   if(source == 'v')
   {
     VOC_val = newMeasVal;
-    Serial.println(VOC_val);
   }
+  else if(source == 'c')
+  {
+    Ozo_val = newMeasVal;
+  }
+
+  Serial.print(VOC_val);
+  Serial.print(",");
+  Serial.println(Ozo_val);
 }
 
 ///////////////////////////////////////////
 // expFilter takes measured value and source and returns a filtered value using past data from the source
 // see: https://en.wikipedia.org/wiki/Exponential_smoothing
 //
-// source options are 'v' (VOC), 
+// source options are 'v' (VOC)
 //
 double expFilt(char source, double measVal)
 {
   double returnVal; // filtered value to return
 
   // filter parameters
-  double alpha_voc = 0.001;
+  double alpha_voc = 0.01;
 
   // static values that persist every function call
   static bool firstVOC = true;
