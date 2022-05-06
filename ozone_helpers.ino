@@ -4,7 +4,7 @@
 #define OZO_ACT_PIN 6
 
 #define LOAD_R 1000000
-#define R0 (60041.42 + 77894.69 + 94017.15 + 114254.60)/4.0
+#define R0 114254.60
 
 void warmup_ozo(void)
 {
@@ -40,7 +40,6 @@ bool toggle_ozo_sensor(void)
     MQ131.sampleNow();
     int OzoMeas = MQ131.getO3(PPB);
 
-    Serial.println(OzoMeas);
     postNewMeasurement('o', OzoMeas);
     digitalWrite(OZO_ACT_PIN, LOW);
   }

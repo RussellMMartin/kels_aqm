@@ -8,8 +8,8 @@
 
 // defines
 #define DEBUG 1
-#define VOC_FREQ 1000
-#define OZO_FREQ 10000
+#define VOC_FREQ 5000     // ms
+#define OZO_FREQ 20000    // ms
 
 // module-level variables
 auto timer = timer_create_default();
@@ -49,13 +49,14 @@ void loop() {
 ///////////////////////////////////////////
 // postNewMeasurement posts new measured values from sensor modules into the main module (here)
 //
+// source options are 'v' (VOC), 'o' (ozone)
 void postNewMeasurement(char source, int newMeasVal)
 {
   if(source == 'v')
   {
     VOC_val = newMeasVal;
   }
-  else if(source == 'c')
+  else if(source == 'o')
   {
     Ozo_val = newMeasVal;
   }
@@ -76,7 +77,7 @@ double expFilt(char source, double measVal)
   double returnVal; // filtered value to return
 
   // filter parameters
-  double alpha_voc = 0.01;
+  double alpha_voc = 0.5;
 
   // static values that persist every function call
   static bool firstVOC = true;
